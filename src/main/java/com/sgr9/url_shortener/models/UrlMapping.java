@@ -24,3 +24,4 @@ public class UrlMapping {
     @OneToMany(mappedBy = "urlMapping")
     private List<ClickEvent> clickEvents;
 }
+  
