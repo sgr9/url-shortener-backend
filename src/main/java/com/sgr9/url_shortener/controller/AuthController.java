@@ -1,5 +1,6 @@
 package com.sgr9.url_shortener.controller;
 
+import com.sgr9.url_shortener.dto.LoginRequest;
 import com.sgr9.url_shortener.dto.RegisterRequest;
 import com.sgr9.url_shortener.models.User;
 import com.sgr9.url_shortener.service.UserService;
@@ -15,6 +16,12 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     
     private UserService userService;
+
+    @PostMapping("/public/login")
+    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
+
+        return ResponseEntity.ok(userService.authenticateUser(loginRequest));
+    }
 
     @PostMapping("/public/register")
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequest registerRequest) {
