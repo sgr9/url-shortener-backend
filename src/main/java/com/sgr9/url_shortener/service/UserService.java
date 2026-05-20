@@ -13,17 +13,29 @@ import com.sgr9.url_shortener.repository.UserRepository;
 import com.sgr9.url_shortener.security.jwt.JwtAuthenticationResponse;
 import com.sgr9.url_shortener.security.jwt.JwtUtils;
 
-import lombok.AllArgsConstructor;
-
 @Service
-@AllArgsConstructor
 public class UserService {
-    private  PasswordEncoder passwordEncoder;
-    private  UserRepository userRepository;
-    private AuthenticationManager authenticationManager;
-    private JwtUtils jwtUtils;
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
+
+    public UserService(PasswordEncoder passwordEncoder, UserRepository userRepository,
+                       AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
+        this.passwordEncoder = passwordEncoder;
+        this.userRepository = userRepository;
+        this.authenticationManager = authenticationManager;
+        this.jwtUtils = jwtUtils;
+    }
 
     public User registerUser(User user) {
+        normalizeUser(user);
+        if (userRepository.existsByUsername(user.getUsername())) {
+            throw new IllegalArgumentException("Username is already taken");
+        }
+        if (userRepository.existsByEmailIgnoreCase(user.getEmail())) {
+            throw new IllegalArgumentException("Email is already in use");
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
@@ -31,7 +43,7 @@ public class UserService {
     public JwtAuthenticationResponse authenticateUser(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
-                loginRequest.getUsername(),
+                loginRequest.getIdentifier().trim(),
                 loginRequest.getPassword()
             )
         );
@@ -39,6 +51,11 @@ public class UserService {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         String jwt = jwtUtils.generateToken(userDetails);
         return new JwtAuthenticationResponse(jwt);
+    }
+
+    private void normalizeUser(User user) {
+        user.setUsername(user.getUsername().trim());
+        user.setEmail(user.getEmail().trim().toLowerCase());
     }
 
 }
