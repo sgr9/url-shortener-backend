@@ -11,7 +11,6 @@ import com.sgr9.url_shortener.service.UserService;
 import com.sgr9.url_shortener.models.User;
 
 
-import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,10 +26,14 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/urls")
-@AllArgsConstructor
 public class UrlMappingController {
-    private UrlMappingService urlMappingService;
-    private UserService userService;
+    private final UrlMappingService urlMappingService;
+    private final UserService userService;
+
+    public UrlMappingController(UrlMappingService urlMappingService, UserService userService) {
+        this.urlMappingService = urlMappingService;
+        this.userService = userService;
+    }
 
     // {"originalUrl":"https://example.com"}
 //    https://abc.com/QN7XOa0a --> https://example.com

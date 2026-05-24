@@ -1,6 +1,5 @@
 package com.sgr9.url_shortener.service;
 
-import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import com.sgr9.url_shortener.dto.ClickEventDTO;
@@ -19,18 +18,22 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
 public class UrlMappingService {
-    private ClickEventRepository clickEventRepository;
-    private UrlMappingRepository urlMappingRepository;
+    private final ClickEventRepository clickEventRepository;
+    private final UrlMappingRepository urlMappingRepository;
+
+    public UrlMappingService(ClickEventRepository clickEventRepository, UrlMappingRepository urlMappingRepository) {
+        this.clickEventRepository = clickEventRepository;
+        this.urlMappingRepository = urlMappingRepository;
+    }
 
     public UrlMappingDTO createShortUrl(String originalUrl, User user) {
         String shortUrl = generateShortUrl();
         UrlMapping urlMapping = new UrlMapping();
-        urlMapping.setOriginalURL(originalUrl);
-        urlMapping.setShortURL(shortUrl);
+        urlMapping.setOriginalUrl(originalUrl);
+        urlMapping.setShortUrl(shortUrl);
         urlMapping.setUser(user);
-        urlMapping.setCreatedData(LocalDateTime.now());
+        urlMapping.setCreatedDate(LocalDateTime.now());
         UrlMapping savedUrlMapping = urlMappingRepository.save(urlMapping);
         return convertToDto(savedUrlMapping);
     }
@@ -38,10 +41,10 @@ public class UrlMappingService {
     private UrlMappingDTO convertToDto(UrlMapping urlMapping){
         UrlMappingDTO urlMappingDTO = new UrlMappingDTO();
         urlMappingDTO.setId(urlMapping.getId());
-        urlMappingDTO.setOriginalUrl(urlMapping.getOriginalURL());
-        urlMappingDTO.setShortUrl(urlMapping.getShortURL());
+        urlMappingDTO.setOriginalUrl(urlMapping.getOriginalUrl());
+        urlMappingDTO.setShortUrl(urlMapping.getShortUrl());
         urlMappingDTO.setClickCount(urlMapping.getClickCount());
-        urlMappingDTO.setCreatedDate(urlMapping.getCreatedData());
+        urlMappingDTO.setCreatedDate(urlMapping.getCreatedDate());
         urlMappingDTO.setUsername(urlMapping.getUser().getUsername());
         return urlMappingDTO;
     }
