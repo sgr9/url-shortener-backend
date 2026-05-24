@@ -1,5 +1,5 @@
 # Use a Java 23 JDK image to build the Spring Boot app
-FROM eclipse-temurin:25-jdk AS build
+FROM eclipse-temurin:23-jdk AS build
 
 # Set the working directory
 WORKDIR /app
