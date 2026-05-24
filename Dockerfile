@@ -13,7 +13,7 @@ RUN chmod +x mvnw
 
 # Copy the pom.xml and install dependencies
 COPY pom.xml ./
-RUN ./mvnw dependency:go-offline
+RUN ./mvnw dependency:go-offline -DskipTests
 
 # Copy the source code and build the application
 COPY src ./src
