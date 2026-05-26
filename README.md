@@ -9,7 +9,7 @@ A full-featured URL shortening service built with Spring Boot 4.0.1, featuring J
 | Layer | Technology |
 |---|---|
 | Framework | Spring Boot 4.0.1 |
-| Language | Java 25 |
+| Language | Java 23 |
 | Security | Spring Security + JWT (jjwt 0.12.6) |
 | Persistence | Spring Data JPA + PostgreSQL |
 | Build Tool | Maven (via Maven Wrapper) |
@@ -84,11 +84,13 @@ url-shortener-backend/
 Create a `.env` file in the project root:
 
 ```env
-username=your_db_user
-password=your_db_password
-
-jwt_secret=your_jwt_secret_key
-jwt_expiration=your_jwt_expiration
+spring.datasource.url=jdbc:-----
+username=------
+password=----------
+database_dialect=org.hibernate.dialect.PostgreSQLDialect
+jwt_secret=---------------------
+jwt_expiration=----------
+frontend_url=http://--------.com
 ```
 
 
