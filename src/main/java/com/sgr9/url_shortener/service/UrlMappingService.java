@@ -14,17 +14,23 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+import java.security.SecureRandom;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 @Service
 public class UrlMappingService {
     private final ClickEventRepository clickEventRepository;
     private final UrlMappingRepository urlMappingRepository;
+    private final StringRedisTemplate redisTemplate;
 
-    public UrlMappingService(ClickEventRepository clickEventRepository, UrlMappingRepository urlMappingRepository) {
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
+    public UrlMappingService(ClickEventRepository clickEventRepository, UrlMappingRepository urlMappingRepository, StringRedisTemplate redisTemplate) {
         this.clickEventRepository = clickEventRepository;
         this.urlMappingRepository = urlMappingRepository;
+        this.redisTemplate = redisTemplate;
     }
 
     public UrlMappingDTO createShortUrl(String originalUrl, User user) {
@@ -35,6 +41,10 @@ public class UrlMappingService {
         urlMapping.setUser(user);
         urlMapping.setCreatedDate(LocalDateTime.now());
         UrlMapping savedUrlMapping = urlMappingRepository.save(urlMapping);
+
+        // Cache the newly created URL mapping in Redis
+        redisTemplate.opsForValue().set("url:" + shortUrl, originalUrl);
+
         return convertToDto(savedUrlMapping);
     }
 
@@ -52,11 +62,10 @@ public class UrlMappingService {
     private String generateShortUrl() {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-        Random random = new Random();
         StringBuilder shortUrl = new StringBuilder(8);
 
         for (int i = 0; i < 8; i++) {
-            shortUrl.append(characters.charAt(random.nextInt(characters.length())));
+            shortUrl.append(characters.charAt(SECURE_RANDOM.nextInt(characters.length())));
         }
         return shortUrl.toString();
     }
@@ -94,17 +103,35 @@ public class UrlMappingService {
     }
 
     public UrlMapping getOriginalUrl(String shortUrl) {
-        UrlMapping urlMapping = urlMappingRepository.findByShortUrl(shortUrl);
-        if (urlMapping != null) {
-            urlMapping.setClickCount(urlMapping.getClickCount() + 1);
-            urlMappingRepository.save(urlMapping);
+        String cachedUrl = redisTemplate.opsForValue().get("url:" + shortUrl);
+        UrlMapping urlMapping;
 
-            // Record Click Event
-            ClickEvent clickEvent = new ClickEvent();
-            clickEvent.setClickDate(LocalDateTime.now());
-            clickEvent.setUrlMapping(urlMapping);
-            clickEventRepository.save(clickEvent);
+        if (cachedUrl != null) {
+            urlMapping = new UrlMapping();
+            urlMapping.setOriginalUrl(cachedUrl);
+            urlMapping.setShortUrl(shortUrl);
+        } else {
+            urlMapping = urlMappingRepository.findByShortUrl(shortUrl);
+            if (urlMapping != null) {
+                redisTemplate.opsForValue().set("url:" + shortUrl, urlMapping.getOriginalUrl());
+            } else {
+                return null;
+            }
         }
+
+        // Process analytics asynchronously to avoid blocking the redirect response
+        CompletableFuture.runAsync(() -> {
+            UrlMapping mappingToUpdate = urlMappingRepository.findByShortUrl(shortUrl);
+            if (mappingToUpdate != null) {
+                mappingToUpdate.setClickCount(mappingToUpdate.getClickCount() + 1);
+                urlMappingRepository.save(mappingToUpdate);
+
+                ClickEvent clickEvent = new ClickEvent();
+                clickEvent.setClickDate(LocalDateTime.now());
+                clickEvent.setUrlMapping(mappingToUpdate);
+                clickEventRepository.save(clickEvent);
+            }
+        });
 
         return urlMapping;
     }

@@ -1,6 +1,6 @@
 # URL Shortener — Spring Boot
 
-A full-featured URL shortening service built with Spring Boot 4.0.1, featuring JWT-based authentication, click analytics, and a Dockerized deployment setup.
+A full-featured URL shortening service built with Spring Boot 4.0.1, featuring JWT-based authentication, click analytics,Redis caching and a Dockerized deployment setup.
 
 ---
 
@@ -9,7 +9,9 @@ A full-featured URL shortening service built with Spring Boot 4.0.1, featuring J
 | Layer | Technology |
 |---|---|
 | Framework | Spring Boot 4.0.1 |
-| Language | Java 25 |
+| Language | Java 21 |
+| Database | PostgreSQL |
+| Caching | Redis |
 | Security | Spring Security + JWT (jjwt 0.12.6) |
 | Persistence | Spring Data JPA + PostgreSQL |
 | Build Tool | Maven (via Maven Wrapper) |

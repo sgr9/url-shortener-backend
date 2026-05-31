@@ -18,6 +18,14 @@ public class RedirectController {
         this.urlMappingService = urlMappingService;
     }
 
+    // Redirect users who visit the bare backend URL to the frontend landing page
+    @GetMapping("/")
+    public ResponseEntity<Void> redirectToFrontend(){
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("Location", "https://your-app.vercel.app"); // TODO: Replace with your actual Vercel URL
+        return ResponseEntity.status(302).headers(httpHeaders).build();
+    }
+
     @GetMapping("/{shortUrl}")
     public ResponseEntity<Void> redirect(@PathVariable String shortUrl){
         UrlMapping urlMapping = urlMappingService.getOriginalUrl(shortUrl);
