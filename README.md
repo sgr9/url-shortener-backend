@@ -9,7 +9,7 @@ A full-featured URL shortening service built with Spring Boot 4.0.1, featuring J
 | Layer | Technology |
 |---|---|
 | Framework | Spring Boot 4.0.1 |
-| Language | Java 21 |
+| Language | Java 21+ |
 | Database | PostgreSQL |
 | Caching | Redis |
 | Security | Spring Security + JWT (jjwt 0.12.6) |
@@ -77,7 +77,7 @@ url-shortener-backend/
 
 ### Prerequisites
 
-- Java 23+
+- Java 21+
 - Maven 3.9+ (or use the included `mvnw` wrapper)
 - PostgreSQL instance (local or remote)
 
@@ -86,11 +86,14 @@ url-shortener-backend/
 Create a `.env` file in the project root:
 
 ```env
-username=your_db_user
-password=your_db_password
-
-jwt_secret=your_jwt_secret_key
-jwt_expiration=your_jwt_expiration
+spring.datasource.url=jdbc:-----
+username=------
+password=----------
+database_dialect=org.hibernate.dialect.PostgreSQLDialect
+jwt_secret=---------------------
+jwt_expiration=----------
+frontend_url=http://--------.com
+redis_url=rediss:jeienm------
 ```
 
 
@@ -170,6 +173,7 @@ docker run -p 8080:8080 --env-file .env url-shortener-sb
 | `spring-boot-starter-data-jpa` | ORM & database access |
 | `spring-boot-starter-security` | Authentication & authorization |
 | `postgresql` | PostgreSQL JDBC driver |
+| `redis` | Redis client |
 | `jjwt-api / jjwt-impl / jjwt-jackson` | JWT generation & validation |
 | `lombok` | Boilerplate reduction |
 | `spring-boot-starter-test` | Unit & integration testing |
